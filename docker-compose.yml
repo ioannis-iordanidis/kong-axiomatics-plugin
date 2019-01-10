@@ -1,0 +1,72 @@
+version: "2.1"
+
+services:
+  kong-database:
+    image: postgres:9.5
+    container_name: kong-database
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=kong
+      - POSTGRES_DB=kong
+    volumes:
+      - "db-data-kong-postgres:/var/lib/postgresql/data"
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
+      interval: 3s
+      timeout: 5s
+      retries: 5
+  kong-migrations:
+    build: 
+      context: .
+    container_name: kong-migrations
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=kong-database
+    restart: always
+    links:
+      - kong-database
+    command: ["kong","migrations","up"]
+    depends_on:
+      kong-database:
+        condition: service_healthy
+  kong:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: kong
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=kong-database
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001
+      - KONG_LOG_LEVEL=debug
+    restart: always
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "8001:8001"
+      - "7946:7946"
+      - "7946:7946/udp"
+    links:
+      - kong-database
+      - kong-migrations
+    depends_on:
+      - kong-migrations
+    healthcheck:
+      test: "curl -f http://localhost:8001"
+      interval: 3s
+      timeout: 5s
+      retries: 10
+  kong-dashboard:
+    image: pgbi/kong-dashboard:v3.3.0
+    container_name: kong-dashboard
+    ports:
+      - "8080:8080"
+    links:
+      - kong:kong
+    command: ["start", "--kong-url", "http://kong:8001", "--port", "8080"]
+    depends_on:
+      kong:
+        condition: service_healthy
+volumes:
+  db-data-kong-postgres:   
