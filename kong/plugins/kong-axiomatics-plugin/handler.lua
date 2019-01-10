@@ -1,5 +1,5 @@
 local BasePlugin = require "kong.plugins.base_plugin"
-local access = require "kong.plugins.kong-plugin-hello-world.access"
+local access = require "kong.plugins.kong-axiomatics-plugin.access"
 
 local HelloWorldHandler = BasePlugin:extend()
 
