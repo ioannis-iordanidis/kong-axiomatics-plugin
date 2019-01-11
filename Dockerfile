@@ -10,7 +10,7 @@ RUN apk update && apk upgrade && \
 
 RUN git clone https://github.com/ioannis-iordanidis/kong-axiomatics-plugin.git /tmp/jwt \
 && cd /tmp/jwt \
-&& git checkout master \
+&& git checkout clean_hello_world \
 && mv /tmp/jwt/kong/plugins/kong-axiomatics-plugin /usr/local/share/lua/5.1/kong/plugins/kong-axiomatics-plugin
 
 ENV KONG_CUSTOM_PLUGINS=kong-axiomatics-plugin
