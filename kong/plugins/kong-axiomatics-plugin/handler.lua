@@ -1,17 +1,17 @@
 local BasePlugin = require "kong.plugins.base_plugin"
 local access = require "kong.plugins.kong-axiomatics-plugin.access"
 
-local HelloWorldHandler = BasePlugin:extend()
+local AxiomaticsHandler = BasePlugin:extend()
 
-HelloWorldHandler.PRIORITY = 2000
+AxiomaticsHandler.PRIORITY = 2000
 
-function HelloWorldHandler:new()
-  HelloWorldHandler.super.new(self, "hello-world")
+function AxiomaticsHandler:new()
+  AxiomaticsHandler.super.new(self, "hello-world")
 end
 
-function HelloWorldHandler:access(conf)
-  HelloWorldHandler.super.access(self)
+function AxiomaticsHandler:access(conf)
+  AxiomaticsHandler.super.access(self)
   access.execute(conf)
 end
 
-return HelloWorldHandler
+return AxiomaticsHandler
