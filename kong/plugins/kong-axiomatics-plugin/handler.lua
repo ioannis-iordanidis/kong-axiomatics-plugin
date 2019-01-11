@@ -6,7 +6,7 @@ local AxiomaticsHandler = BasePlugin:extend()
 AxiomaticsHandler.PRIORITY = 2000
 
 function AxiomaticsHandler:new()
-  AxiomaticsHandler.super.new(self, "hello-world")
+  AxiomaticsHandler.super.new(self, "axiomatics-plugin")
 end
 
 function AxiomaticsHandler:access(conf)
