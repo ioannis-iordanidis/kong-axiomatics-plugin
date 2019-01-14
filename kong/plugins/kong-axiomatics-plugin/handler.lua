@@ -1,5 +1,5 @@
 local BasePlugin = require "kong.plugins.base_plugin"
-local inject_header = require "kong.plugins.kong-axiomatics-plugin.inject_header"
+local access = require "kong.plugins.kong-axiomatics-plugin.access"
 
 local AxiomaticsHandler = BasePlugin:extend()
 
@@ -11,7 +11,7 @@ end
 
 function AxiomaticsHandler:access(conf)
   AxiomaticsHandler.super.access(self)
-  inject_header.execute(conf)
+  access.execute(conf)
 end
 
 return AxiomaticsHandler
