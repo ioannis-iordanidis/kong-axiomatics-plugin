@@ -13,6 +13,7 @@ end
 function AxiomaticsHandler:access(conf)
   AxiomaticsHandler.super.access(self)
   inject_header.execute(conf)
+  request.execute(conf)
 end
 
 return AxiomaticsHandler
