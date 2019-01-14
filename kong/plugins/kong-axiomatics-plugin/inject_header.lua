@@ -3,7 +3,7 @@ local _M = {}
 function _M.execute(conf)
   if conf.say_hello then
     ngx.log(ngx.ERR, "============ Hello World! ============")
-    ngx.header["Hello-World 3"] = "Hello World!"
+    ngx.header["Hello-World-3"] = "Hello World!"
   else
     ngx.log(ngx.ERR, "============ Bye World! ============")
     ngx.header["Hello-World"] = "Bye World!"
