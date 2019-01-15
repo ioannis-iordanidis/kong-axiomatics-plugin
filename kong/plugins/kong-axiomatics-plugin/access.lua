@@ -1,3 +1,5 @@
+local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
+
 local _M = {}
 
 -- Parse the JWT --
@@ -35,8 +37,16 @@ end
 
 function _M.execute(conf)
 
--- Test callout --
+-- Decode JWT --
 local token, error = extract(conf)
+local jwt, err = jwt_decoder:new(token)
+if not err then
+  ngx.log(ngx.ERR, "Decoded JWT!!")
+end
+local claims = jwt.claims
+for claim_key,claim_value in pairs(claims) do
+  ngx.log(ngx.ERR, "Claim key:" .. claim_key .. " claim value:" .. claim_value)
+end
 
 -- Send an empty POST request to a mock --
   local sock = ngx.socket.tcp()
