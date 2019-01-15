@@ -1,7 +1,44 @@
 local _M = {}
 
+-- Parse the JWT --
+local function extract(conf)
+  local jwt
+  local err
+  local header = ngx.req.get_headers()[conf.token_header_name]
+
+  if header == nil then
+    err = "No token found using header: " .. conf.token_header_name
+    ngx.log(ngx.ERR, err)
+    return nil, err
+  end
+
+  if header:find(" ") then
+    local divider = header:find(' ')
+    if string.lower(header:sub(0, divider-1)) == string.lower("Bearer") then
+      jwt = header:sub(divider+1)
+      if jwt == nil then
+        err = "No Bearer token value found from header: " .. conf.token_header_name
+        ngx.log(ngx.ERR, err)
+        return nil, err
+      end
+    end
+  end
+
+  if jwt == nil then
+    jwt = header
+  end
+
+  ngx.log(ngx.ERR, "JWT token located using header: " .. conf.token_header_name .. ", token length: " .. string.len(jwt))
+  return jwt, err
+end
+
+
 function _M.execute(conf)
 
+-- Test callout --
+local token, error = extract(conf)
+
+-- Send an empty POST request to a mock --
   local sock = ngx.socket.tcp()
   sock:settimeout(1000)
 
