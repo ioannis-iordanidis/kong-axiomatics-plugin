@@ -1,61 +1,62 @@
 local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
+local re_gmatch = ngx.re.gmatch
 
 local _M = {}
 
--- Parse the JWT --
-local function extract(conf)
-  local jwt
-  local err
-  local header = ngx.req.get_headers()[conf.token_header_name]
+-- Retrieve JWT from the parametrised request header name --
+local function retrieve_token(conf)
+  local authorization_header = kong.request.get_header(conf.token_header_name)
+  if authorization_header then
+    local iterator, iter_err = re_gmatch(authorization_header, "\\s*[Bb]earer\\s+(.+)")
+    if not iterator then
+      ngx.log(ngx.ERR, "No token found using header: " .. conf.token_header_name)
+      return nil, iter_err
+    end
 
-  if header == nil then
-    err = "No token found using header: " .. conf.token_header_name
-    ngx.log(ngx.ERR, err)
-    return nil, err
+    local m, err = iterator()
+    if err then
+      ngx.log(ngx.ERR, "No Bearer token value found from header: " .. conf.token_header_name)
+      return nil, err
+    end
+
+    if m and #m > 0 then
+      ngx.log(ngx.ERR, "JWT token located using header: " .. conf.token_header_name .. ", token length: " .. string.len(m[1]))
+      return m[1]
+    end
   end
+end
 
-  if header:find(" ") then
-    local divider = header:find(' ')
-    if string.lower(header:sub(0, divider-1)) == string.lower("Bearer") then
-      jwt = header:sub(divider+1)
-      if jwt == nil then
-        err = "No Bearer token value found from header: " .. conf.token_header_name
-        ngx.log(ngx.ERR, err)
-        return nil, err
+-- Decode JWT from Base64 to Kong JWT parser
+local function decode_token(token)
+  local decoded_token, err = jwt_decoder:new(token)
+  if err then
+    ngx.log(ngx.ERR, "Not able to decode JWT token with error ", err)
+  else
+    ngx.log(ngx.ERR, "JWT token decoded")
+  end
+  return decoded_token, err
+end
+
+-- Parse the selected claims out of the JWT to a POST body --
+local function compose_post_payload(decoded_token, conf)
+  local claims = decoded_token.claims
+  for claim_key,claim_value in pairs(claims) do
+    for _,claim_pattern in pairs(conf.claims_to_include) do
+      if string.match(claim_key, "^"..claim_pattern.."$") then
+        if (type(claim_value) == "table") then
+          ngx.log(ngx.ERR, "claim key: " .. claim_key .. ", claim_value: " .. table.concat(claim_value))
+        else
+          ngx.log(ngx.ERR, "claim key: " .. claim_key .. ", claim_value: " .. claim_value)
+        end
       end
     end
   end
-
-  if jwt == nil then
-    jwt = header
-  end
-
-  ngx.log(ngx.ERR, "JWT token located using header: " .. conf.token_header_name .. ", token length: " .. string.len(jwt))
-  return jwt, err
 end
-
 
 function _M.execute(conf)
-
--- Decode JWT --
-local token, error = extract(conf)
-local jwt, err = jwt_decoder:new(token)
-if not err then
-  ngx.log(ngx.ERR, "Decoded JWT!!")
-end
-
-local claims = jwt.claims
-for claim_key,claim_value in pairs(claims) do
-  for _,claim_pattern in pairs(conf.claims_to_include) do
-    if string.match(claim_key, "^"..claim_pattern.."$") then
-      if (type(claim_value) == "table") then
-        ngx.log(ngx.ERR, "claim key: " .. claim_key .. ", claim_value: " .. table.concat(claim_value))
-      else
-        ngx.log(ngx.ERR, "claim key: " .. claim_key .. ", claim_value: " .. claim_value)
-      end
-    end
-  end
-end
+  local token, error = retrieve_token(conf)
+  local decoded_token, err = decode_token(token)
+  compose_post_payload(decoded_token, conf)
 
 -- Send an empty POST request to a mock --
   local sock = ngx.socket.tcp()
