@@ -20,6 +20,7 @@ build = {
   type = "builtin",
   modules = {
     ["kong.plugins.axiomatics.access"] = "kong/plugins/kong-axiomatics-plugin/access.lua",
+    ["kong.plugins.axiomatics.json"] = "kong/plugins/kong-axiomatics-plugin/json.lua",
     ["kong.plugins.axiomatics.handler"] = "kong/plugins/kong-axiomatics-plugin/handler.lua",
     ["kong.plugins.axiomatics.schema"] = "kong/plugins/kong-axiomatics-plugin/schema.lua"
   }
