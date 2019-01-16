@@ -43,9 +43,14 @@ local jwt, err = jwt_decoder:new(token)
 if not err then
   ngx.log(ngx.ERR, "Decoded JWT!!")
 end
+
 local claims = jwt.claims
 for claim_key,claim_value in pairs(claims) do
-  ngx.log(ngx.ERR, "Claim key:" .. claim_key .. " claim value:" .. claim_value)
+  for _,claim_pattern in pairs(conf.claims_to_include) do
+    if string.match(claim_key, "^"..claim_pattern.."$") then
+      ngx.log(ngx.ERR, "claim key:" .. claim_key)
+    end
+  end
 end
 
 -- Send an empty POST request to a mock --
