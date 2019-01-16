@@ -54,6 +54,7 @@ local function compose_post_payload(decoded_token, conf)
   return payload
 end
 
+-- Main function called from the Handler --
 function _M.execute(conf)
   local token, error = retrieve_token(conf)
   local decoded_token, err = decode_token(token)
