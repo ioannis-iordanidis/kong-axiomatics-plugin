@@ -42,21 +42,15 @@ end
 -- Parse the selected claims out of the JWT to a POST body --
 local function compose_post_payload(decoded_token, conf)
   local claims = decoded_token.claims
+  local payload = {}
   for claim_key,claim_value in pairs(claims) do
     for _,claim_pattern in pairs(conf.claims_to_include) do
       if string.match(claim_key, "^"..claim_pattern.."$") then
-        local raw_json = JSON:encode(claim_value)
-        ngx.log(ngx.ERR, "----->" .. raw_json)
-
-
-        if (type(claim_value) == "table") then
-          ngx.log(ngx.ERR, "claim key: " .. claim_key .. ", claim_value: " .. table.concat(claim_value))
-        else
-          ngx.log(ngx.ERR, "claim key: " .. claim_key .. ", claim_value: " .. claim_value)
-        end
+        payload[claim_key] = claim_value
       end
     end
   end
+  ngx.log(ngx.ERR, "----------> final payload\n" .. JSON:encode_pretty(payload) .. "\n")
 end
 
 function _M.execute(conf)
