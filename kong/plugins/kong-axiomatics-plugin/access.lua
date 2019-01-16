@@ -48,7 +48,11 @@ local claims = jwt.claims
 for claim_key,claim_value in pairs(claims) do
   for _,claim_pattern in pairs(conf.claims_to_include) do
     if string.match(claim_key, "^"..claim_pattern.."$") then
-      ngx.log(ngx.ERR, "claim key:" .. claim_key)
+      if (type(claim_value) == "table") then
+        ngx.log(ngx.ERR, "claim key: " .. claim_key .. ", claim_value: " .. table.concat(claim_value))
+      else
+        ngx.log(ngx.ERR, "claim key: " .. claim_key .. ", claim_value: " .. claim_value)
+      end
     end
   end
 end
