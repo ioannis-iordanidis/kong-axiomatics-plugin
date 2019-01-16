@@ -79,7 +79,7 @@ function _M.execute(conf)
   local post_request = string.format(
     "POST %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s",
     "/middleman", "optum.proxy.beeceptor.com", #payload, payload)
-  ngx.log(ngx.ERR,  "--------> Post request:\n", post_request .. "\n")
+  ngx.log(ngx.ERR, "Post request:\n", post_request .. "\n")
   local ok, err = sock:send(post_request)
   if not ok then
     ngx.log(ngx.ERR, "Failed to send ", err)
