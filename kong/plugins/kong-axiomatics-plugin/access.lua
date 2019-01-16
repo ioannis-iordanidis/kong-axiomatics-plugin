@@ -50,13 +50,14 @@ local function compose_post_payload(decoded_token, conf)
       end
     end
   end
-  ngx.log(ngx.ERR, "----------> final payload\n" .. JSON:encode_pretty(payload) .. "\n")
+  ngx.log(ngx.ERR, "Selected claim and values parsed out of the JWT:\n" .. JSON:encode_pretty(payload) .. "\n")
+  return payload
 end
 
 function _M.execute(conf)
   local token, error = retrieve_token(conf)
   local decoded_token, err = decode_token(token)
-  compose_post_payload(decoded_token, conf)
+  local payload = compose_post_payload(decoded_token, conf)
 
 -- Send an empty POST request to a mock --
   local sock = ngx.socket.tcp()
