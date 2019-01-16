@@ -51,7 +51,7 @@ local function compose_post_payload(decoded_token, conf)
     end
   end
   ngx.log(ngx.ERR, "Selected claim and values parsed out of the JWT:\n" .. JSON:encode_pretty(payload) .. "\n")
-  return payload
+  return JSON:encode_pretty(payload)
 end
 
 -- Main function called from the Handler --
@@ -76,7 +76,16 @@ function _M.execute(conf)
     ngx.log(ngx.ERR, "No ssl error: ", tostring(ok))
   end
 
-  local ok, err = sock:send("GET /middleman HTTP/1.1\r\nHost: optum.proxy.beeceptor.com\r\nConnection: close\r\n\r\n")
+  local post_request = string.format(
+    "POST %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s",
+    "/middleman", "optum.proxy.beeceptor.com", #payload, payload)
+  ngx.log(ngx.ERR,  "--------> Post request:\n", post_request .. "\n")
+  local ok, err = sock:send(post_request)
+  --local ok, err = sock:send("POST /middleman HTTP/1.1\r\nHost: optum.proxy.beeceptor.com\r\nConnection: close\r\n\r\n")
+
+
+
+
   if not ok then
     ngx.log(ngx.ERR, "Failed to send ", err)
   else
