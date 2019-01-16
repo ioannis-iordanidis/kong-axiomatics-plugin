@@ -81,11 +81,6 @@ function _M.execute(conf)
     "/middleman", "optum.proxy.beeceptor.com", #payload, payload)
   ngx.log(ngx.ERR,  "--------> Post request:\n", post_request .. "\n")
   local ok, err = sock:send(post_request)
-  --local ok, err = sock:send("POST /middleman HTTP/1.1\r\nHost: optum.proxy.beeceptor.com\r\nConnection: close\r\n\r\n")
-
-
-
-
   if not ok then
     ngx.log(ngx.ERR, "Failed to send ", err)
   else
