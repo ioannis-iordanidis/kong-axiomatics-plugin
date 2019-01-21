@@ -15,11 +15,11 @@ Clone this repo
 <pre>
 $ git clone https://github.com/ioannis-iordanidis/kong-axiomatics-plugin
 $ cd kong-axiomatics-plugin
-$ luarocks make \*.rockspec
+$ luarocks make kong-axiomatics-plugin-0.1-1.rockspec
 </pre>
 
 You will also have to add the kong-axiomatics-plugin in your configuration file.
-If you are starting from the default kong.conf file uncomment the plugins key
+If you are starting from the default kong.conf file uncomment the plugins key and add this one
 
 <pre>
 plugins = bundled, kong-axiomatics-plugin
