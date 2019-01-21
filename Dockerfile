@@ -8,10 +8,10 @@ RUN apk update && apk upgrade && \
     apk add --no-cache openssl-dev && \
     rm -rf /var/cache/apk/*
 
-RUN git clone https://github.com/ioannis-iordanidis/kong-axiomatics-plugin.git /tmp/jwt \
-&& cd /tmp/jwt \
+RUN git clone https://github.com/ioannis-iordanidis/kong-axiomatics-plugin.git /tmp/kap \
+&& cd /tmp/kap \
 && git checkout master \
-&& mv /tmp/jwt/kong/plugins/kong-axiomatics-plugin /usr/local/share/lua/5.1/kong/plugins/kong-axiomatics-plugin
+&& mv /tmp/kap/kong/plugins/kong-axiomatics-plugin /usr/local/share/lua/5.1/kong/plugins/kong-axiomatics-plugin
 
 ENV KONG_CUSTOM_PLUGINS=kong-axiomatics-plugin
 
