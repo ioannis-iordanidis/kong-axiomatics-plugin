@@ -1,9 +1,28 @@
 local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
 local JSON = require "kong.plugins.kong-axiomatics-plugin.json"
+local socket_url = require "socket.url"
 
 local re_gmatch = ngx.re.gmatch
 
+local HTTP = "http"
+local HTTPS = "https"
+
 local _M = {}
+
+local function parse_url(url)
+  local parsed_url = socket_url.parse(url)
+  if not parsed_url.port then
+    if parsed_url.scheme == HTTP then
+      parsed_url.port = 80
+     elseif parsed_url.scheme == HTTPS then
+      parsed_url.port = 443
+     end
+  end
+  if not parsed_url.path then
+    parsed_url.path = "/"
+  end
+  return parsed_url
+end
 
 -- Retrieve JWT from the parametrised request header name --
 local function retrieve_token(conf)
@@ -66,7 +85,7 @@ local function compose_post_payload(decoded_token, conf)
   action_attribute["DataType"] = "anyURI"
   action["Attribute"] = action_attribute
 
-  -- Resource XACML values
+  -- Resource XACML values TODO
 
   -- Payload
   request = {}
@@ -74,35 +93,39 @@ local function compose_post_payload(decoded_token, conf)
   request["AccessSubject"] = access_subject
   request["Action"] = action
   payload["Request"] = request
-  ngx.log(ngx.ERR, "Selected claim and values parsed out of the JWT:\n" .. JSON:encode_pretty(payload) .. "\n")
   return JSON:encode_pretty(payload)
 end
 
--- Main function called from the Handler --
 function _M.execute(conf)
   local token, error = retrieve_token(conf)
   local decoded_token, err = decode_token(token)
   local payload = compose_post_payload(decoded_token, conf)
 
--- POST the payload to a listening mock --
+  -- POST the payload to the PDP endpoint --
+  local parsed_url = parse_url(conf.pdp_url)
+  local host = parsed_url.host
+  local port = tonumber(parsed_url.port)
+
   local sock = ngx.socket.tcp()
   sock:settimeout(1000)
 
-  local ok, err = sock:connect("optum.proxy.beeceptor.com", 443)
+  local ok, err = sock:connect(host, port)
   if not ok then
-    ngx.log(ngx.ERR, "Failed to connect ", err)
+    ngx.log(ngx.ERR, "Failed to connect to " .. host .. ":" .. tostring(port) .. ": ", err)
   end
 
-  local ok, err = sock:sslhandshake()
-  if not ok then
-    ngx.log(ngx.ERR,  "Failed to do SSL handshake with ", err)
-  else
-    ngx.log(ngx.ERR, "No ssl error: ", tostring(ok))
+  if parsed_url.scheme == HTTPS then
+    local ok, err = sock:sslhandshake()
+    if not ok then
+      ngx.log(ngx.ERR, "Failed to do SSL handshake with " .. host .. ":" .. tostring(port) .. ": ", err)
+    else
+      ngx.log(ngx.ERR, "No ssl error: ", tostring(ok))
+    end
   end
 
   local post_request = string.format(
     "POST %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s",
-    "/middleman", "optum.proxy.beeceptor.com", #payload, payload)
+    parsed_url.path, parsed_url.host, #payload, payload)
   ngx.log(ngx.ERR, "Post request:\n", post_request .. "\n")
   local ok, err = sock:send(post_request)
   if not ok then
