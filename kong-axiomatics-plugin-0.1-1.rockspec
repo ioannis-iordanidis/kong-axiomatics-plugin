@@ -29,6 +29,3 @@ build = {
     ["kong.plugins.axiomatics.access_sent_post_request"] = "kong/plugins/kong-axiomatics-plugin/access_sent_post_request.lua"
   }
 }
-
-
-sent_post_request
