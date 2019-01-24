@@ -22,6 +22,13 @@ build = {
     ["kong.plugins.axiomatics.access"] = "kong/plugins/kong-axiomatics-plugin/access.lua",
     ["kong.plugins.axiomatics.lib.json"] = "kong/plugins/kong-axiomatics-plugin/lib/json.lua",
     ["kong.plugins.axiomatics.handler"] = "kong/plugins/kong-axiomatics-plugin/handler.lua",
-    ["kong.plugins.axiomatics.schema"] = "kong/plugins/kong-axiomatics-plugin/schema.lua"
+    ["kong.plugins.axiomatics.schema"] = "kong/plugins/kong-axiomatics-plugin/schema.lua",
+    ["kong.plugins.axiomatics.access_retrieve_token"] = "kong/plugins/kong-axiomatics-plugin/access_retrieve_token.lua",
+    ["kong.plugins.axiomatics.access_decode_token"] = "kong/plugins/kong-axiomatics-plugin/access_decode_token.lua",
+    ["kong.plugins.axiomatics.access_compose_post_payload"] = "kong/plugins/kong-axiomatics-plugin/access_compose_post_payload.lua",
+    ["kong.plugins.axiomatics.access_sent_post_request"] = "kong/plugins/kong-axiomatics-plugin/access_sent_post_request.lua"
   }
 }
+
+
+sent_post_request
