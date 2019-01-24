@@ -54,14 +54,14 @@ local _M = {}
       ngx.log(ngx.ERR, "No send error: ", ok)
     end
 
-    local response, err = sock:receive()
-    if not response then
+    local line, err = sock:receive("*l")
+    if err then
       ngx.log(ngx.ERR,  "Failed to read response: ", err)
     else
-      ngx.log(ngx.ERR, "No error, respose: ", response)
+      ngx.log(ngx.ERR, "No error, respose: ", line)
     end
 
-    return response
+    return line -- TODO return the whole response
   end
 
 return _M
