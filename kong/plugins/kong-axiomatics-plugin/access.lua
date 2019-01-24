@@ -60,7 +60,6 @@ end
 
 -- Compose XACML POST body --
 local function compose_post_payload(decoded_token, conf)
-
   -- AccessSubject XACML values
   local access_subject_attribute_list = {}
   local access_subject = {}
@@ -96,12 +95,8 @@ local function compose_post_payload(decoded_token, conf)
   return JSON:encode_pretty(payload)
 end
 
-function _M.execute(conf)
-  local token, error = retrieve_token(conf)
-  local decoded_token, err = decode_token(token)
-  local payload = compose_post_payload(decoded_token, conf)
-
-  -- POST the payload to the PDP endpoint --
+-- POST the payload to the PDP endpoint --
+local function sent_post_request(payload, conf)
   local parsed_url = parse_url(conf.pdp_url)
   local host = parsed_url.host
   local port = tonumber(parsed_url.port)
@@ -134,12 +129,21 @@ function _M.execute(conf)
     ngx.log(ngx.ERR, "No send error: ", ok)
   end
 
-  local line, err = sock:receive()
-  if not line then
+  local response, err = sock:receive()
+  if not response then
     ngx.log(ngx.ERR,  "Failed to read response: ", err)
   else
-    ngx.log(ngx.ERR, "No error, line: ", line)
+    ngx.log(ngx.ERR, "No error, respose: ", response)
   end
+
+  return response
+end
+
+function _M.execute(conf)
+  local token, error = retrieve_token(conf)
+  local decoded_token, err = decode_token(token)
+  local payload = compose_post_payload(decoded_token, conf)
+  local response = sent_post_request(payload, conf)
 end
 
 return _M
