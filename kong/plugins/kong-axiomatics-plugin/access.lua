@@ -1,5 +1,5 @@
 local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
-local JSON = require "kong.plugins.kong-axiomatics-plugin.json"
+local JSON = require "kong.plugins.kong-axiomatics-plugin.lib.json"
 local socket_url = require "socket.url"
 
 local re_gmatch = ngx.re.gmatch
