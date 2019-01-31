@@ -11,7 +11,6 @@ function _M.execute(conf)
   local decoded_token, err = decode_token.decode_token(token)
   local payload = compose_post_payload.compose_post_payload(decoded_token, conf)
   local pdp_response_body = sent_post_request.sent_post_request(payload, conf)
-
   make_decision.decision(pdp_response_body)
 end
 
