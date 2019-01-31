@@ -84,7 +84,7 @@ local _M = {}
 
     -- format the concatenated lines to JSON
     body = table.concat(t)
-    body = string.match(body, "{.*}") -- trim mystery prefix and suffux numbers, don't know why they are there
+    body = string.match(body, "{.*}") -- trim mystery prefix and suffix numbers, don't know why they are there
     body = JSON:decode(body)
     ngx.log(ngx.ERR, "Response body: ", JSON:encode_pretty(body), "\n")
 
