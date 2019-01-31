@@ -21,7 +21,7 @@ local _M = {}
     return parsed_url
   end
 
--- POST the payload to the PDP endpoint --
+  -- POST the payload to the PDP endpoint --
   function _M.sent_post_request(payload, conf)
     local parsed_url = parse_url(conf.pdp_url)
     local host = parsed_url.host
@@ -55,8 +55,8 @@ local _M = {}
       ngx.log(ngx.ERR, "No send error: ", ok)
     end
 
-    -- Each sock:receive("*l") call returns a single line --
-    local line, err = sock:receive("*l") -- status code line
+    -- Parse the response --
+    local line, err = sock:receive("*l") -- each call returns a single line
     if err then
       ngx.log(ngx.ERR, "Failed to read response: ", err)
     end
@@ -71,7 +71,7 @@ local _M = {}
       if err then
         ngx.log(ngx.ERR, "Failed to read header: ", err)
       end
-    until ngx.re.find(line, "^\\s*$") -- empty line
+    until ngx.re.find(line, "^\\s*$") -- first empty line
 
     local t = {}
     repeat -- body
@@ -80,11 +80,11 @@ local _M = {}
         ngx.log(ngx.ERR, "Failed to read body line: ", err)
       end
       table.insert(t, line)
-    until ngx.re.find(line, "^\\s*$") -- empty line
+    until ngx.re.find(line, "^\\s*$") -- next empty line, effectivelly the end of the request
 
     -- format the concatenated lines to JSON
     body = table.concat(t)
-    body = string.match(body, "{.*}") -- trim mystery prefix and suffux numbers
+    body = string.match(body, "{.*}") -- trim mystery prefix and suffux numbers, don't know why they are there
     body = JSON:decode(body)
     ngx.log(ngx.ERR, "Response body: ", JSON:encode_pretty(body), "\n")
 
