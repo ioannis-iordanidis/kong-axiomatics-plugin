@@ -16,7 +16,7 @@ local _M = {}
 
     local divider = header:find(' ')
     if not divider then
-      local message = "Expecting a space in the value of the " .. conf.token_header_name .. " header"
+      local message = "Expecting a space in the " .. conf.token_header_name .. " header"
       ngx.log(ngx.ERR, message)
       return_error.exit(message, ngx.HTTP_BAD_REQUEST)
     end
