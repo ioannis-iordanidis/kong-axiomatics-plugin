@@ -7,7 +7,7 @@ local make_decision = require "kong.plugins.kong-axiomatics-plugin.access_decisi
 local _M = {}
 
 function _M.execute(conf)
-  local token, err = retrieve_token.retrieve_token(conf)
+  local token = retrieve_token.retrieve_token(conf)
   local decoded_token, err = decode_token.decode_token(token)
   local payload = compose_post_payload.compose_post_payload(decoded_token, conf)
   local pdp_response_body = sent_post_request.sent_post_request(payload, conf)

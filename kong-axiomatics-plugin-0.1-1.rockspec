@@ -21,6 +21,7 @@ build = {
   modules = {
     ["kong.plugins.axiomatics.access"] = "kong/plugins/kong-axiomatics-plugin/access.lua",
     ["kong.plugins.axiomatics.lib.json"] = "kong/plugins/kong-axiomatics-plugin/lib/json.lua",
+    ["kong.plugins.axiomatics.lib.return_error"] = "kong/plugins/kong-axiomatics-plugin/lib/return_error.lua",
     ["kong.plugins.axiomatics.handler"] = "kong/plugins/kong-axiomatics-plugin/handler.lua",
     ["kong.plugins.axiomatics.schema"] = "kong/plugins/kong-axiomatics-plugin/schema.lua",
     ["kong.plugins.axiomatics.access_retrieve_token"] = "kong/plugins/kong-axiomatics-plugin/access_retrieve_token.lua",
