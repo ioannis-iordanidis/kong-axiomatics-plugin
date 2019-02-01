@@ -1,4 +1,5 @@
 local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
+local return_error = require "kong.plugins.kong-axiomatics-plugin.lib.return_error"
 
 local _M = {}
 
@@ -6,11 +7,12 @@ local _M = {}
   function _M.decode_token(token)
     local decoded_token, err = jwt_decoder:new(token)
     if err then
-      ngx.log(ngx.ERR, "Not able to decode JWT token with error ", err)
-    else
-      ngx.log(ngx.ERR, "JWT token decoded")
+      local message = "Decoded Base64 string is not a JWT token"
+      ngx.log(ngx.ERR, message)
+      return_error.exit(message, ngx.HTTP_BAD_REQUEST)
     end
-    return decoded_token, err
+    ngx.log(ngx.ERR, "JWT token decoded")
+    return decoded_token
   end
 
 return _M
