@@ -1,6 +1,6 @@
 local socket_url = require "socket.url"
 local JSON = require "kong.plugins.kong-axiomatics-plugin.lib.json"
-local return_error = require "kong.plugins.kong-axiomatics-plugin.lib.return_error"
+local return_error = require "kong.plugins.kong-axiomatics-plugin.return_error"
 
 local HTTP = "http"
 local HTTPS = "https"

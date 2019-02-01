@@ -1,4 +1,4 @@
-local return_error = require "kong.plugins.kong-axiomatics-plugin.lib.return_error"
+local return_error = require "kong.plugins.kong-axiomatics-plugin.return_error"
 
 local _M = {}
 
