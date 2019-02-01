@@ -24,7 +24,7 @@ local _M = {}
     local action_attribute = {}
     local action = {}
     action_attribute["AttributeId"] = "action-id"
-    action_attribute["Value"] = ngx.var.scheme .. "//" .. ngx.var.host .. ngx.var.request_uri
+    action_attribute["Value"] = ngx.var.scheme .. "://" .. ngx.var.host .. ngx.var.request_uri
     action_attribute["DataType"] = "anyURI"
     action["Attribute"] = action_attribute
 
