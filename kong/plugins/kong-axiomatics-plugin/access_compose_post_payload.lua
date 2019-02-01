@@ -1,4 +1,5 @@
 local JSON = require "kong.plugins.kong-axiomatics-plugin.lib.json"
+local return_error = require "kong.plugins.kong-axiomatics-plugin.lib.return_error"
 
 local _M = {}
 
