@@ -50,7 +50,7 @@ local _M = {}
     local post_request = string.format(
       "POST %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s",
       parsed_url.path, parsed_url.host, #payload, payload)
-    ngx.log(ngx.ERR, "Post request:\n", post_request .. "\n")
+    ngx.log(ngx.ERR, "Post request to PDP:\n", post_request .. "\n")
     local ok, err = sock:send(post_request)
     if not ok then
       local message = "Failed to send request to PDP", err
@@ -99,7 +99,7 @@ local _M = {}
       return_error.exit(message, ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
     body = JSON:decode(body)
-    ngx.log(ngx.ERR, "Response body:\n", JSON:encode_pretty(body), "\n")
+    ngx.log(ngx.ERR, "Response body from PDP:\n", JSON:encode_pretty(body), "\n")
 
     return body
   end
