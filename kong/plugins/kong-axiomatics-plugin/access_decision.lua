@@ -5,7 +5,7 @@ function _M.decision(response)
   local pdp_decision = response.Response[1].Decision
   ngx.log(ngx.ERR, "Decision: ", pdp_decision)
 
-  if pdp_decision ~= "Permit" then
+  if pdp_decision ~= "Permit" and pdp_decision ~= "NotApplicable" then -- parametrise that
     ngx.log(ngx.ERR, "Request was not authorised by PDP, returning 403.")
     ngx.status = ngx.HTTP_FORBIDDEN
     ngx.say("Not Authorised")

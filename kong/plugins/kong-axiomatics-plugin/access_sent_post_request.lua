@@ -64,32 +64,31 @@ local _M = {}
     local status_code = tonumber(string.match(line, "%s(%d%d%d)%s"))
     if status_code ~= 200 then
         ngx.log(ngx.ERR, "Received a non-200 code from PDP: ", status_code)
+    else
+        ngx.log(ngx.ERR, "PDP response: ", line)
     end
 
-    repeat -- rest of headers
+    local headers = {} -- response headers
+    repeat
       line, err = sock:receive("*l")
       if err then
         ngx.log(ngx.ERR, "Failed to read header: ", err)
       end
+
+      local pair = ngx.re.match(line, "(.*):\\s*(.*)", "jo")
+      if pair then
+        headers[string.lower(pair[1])] = pair[2]
+      end
     until ngx.re.find(line, "^\\s*$") -- first empty line
 
-    local t = {}
-    repeat -- body
-      line, err = sock:receive("*l")
-      if err then
-        ngx.log(ngx.ERR, "Failed to read body line: ", err)
-      end
-      table.insert(t, line)
-    until ngx.re.find(line, "^\\s*$") -- next empty line, effectivelly the end of the request
-
-    -- format the concatenated lines to JSON
-    body = table.concat(t)
-    body = string.match(body, "{.*}") -- trim mystery prefix and suffix numbers, don't know why they are there
+    local body, err = sock:receive(tonumber(headers['content-length']))
+    if err then
+      ngx.log(ngx.ERR, "Failed to read body: ", err)
+    end
     body = JSON:decode(body)
-    ngx.log(ngx.ERR, "Response body: ", JSON:encode_pretty(body), "\n")
+    ngx.log(ngx.ERR, "Response body:\n", JSON:encode_pretty(body), "\n")
 
     return body
-
   end
 
 return _M
