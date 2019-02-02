@@ -7,101 +7,101 @@ local HTTPS = "https"
 
 local _M = {}
 
-  local function parse_url(url)
-    local parsed_url = socket_url.parse(url)
-    if not parsed_url.port then
-      if parsed_url.scheme == HTTP then
-        parsed_url.port = 80
-       elseif parsed_url.scheme == HTTPS then
-        parsed_url.port = 443
-       end
-    end
-    if not parsed_url.path then
-      parsed_url.path = "/"
-    end
-    return parsed_url
+local function parse_url(url)
+  local parsed_url = socket_url.parse(url)
+  if not parsed_url.port then
+    if parsed_url.scheme == HTTP then
+      parsed_url.port = 80
+     elseif parsed_url.scheme == HTTPS then
+      parsed_url.port = 443
+     end
+  end
+  if not parsed_url.path then
+    parsed_url.path = "/"
+  end
+  return parsed_url
+end
+
+-- POST the payload to the PDP endpoint --
+function _M.sent_post_request(payload, conf)
+  local parsed_url = parse_url(conf.pdp_url)
+  local host = parsed_url.host
+  local port = tonumber(parsed_url.port)
+
+  local sock = ngx.socket.tcp()
+  sock:settimeout(1000) -- TODO parametrise that
+
+  local ok, err = sock:connect(host, port)
+  if not ok then
+    local message = "Failed to connect to " .. host .. ":" .. tostring(port) .. ": ", err
+    ngx.log(ngx.ERR, message)
+    return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
   end
 
-  -- POST the payload to the PDP endpoint --
-  function _M.sent_post_request(payload, conf)
-    local parsed_url = parse_url(conf.pdp_url)
-    local host = parsed_url.host
-    local port = tonumber(parsed_url.port)
-
-    local sock = ngx.socket.tcp()
-    sock:settimeout(1000) -- TODO parametrise that
-
-    local ok, err = sock:connect(host, port)
+  if parsed_url.scheme == HTTPS then
+    local ok, err = sock:sslhandshake()
     if not ok then
-      local message = "Failed to connect to " .. host .. ":" .. tostring(port) .. ": ", err
+      local message = "Failed to do SSL handshake with " .. host .. ":" .. tostring(port) .. ": ", err
       ngx.log(ngx.ERR, message)
       return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
     end
+  end
 
-    if parsed_url.scheme == HTTPS then
-      local ok, err = sock:sslhandshake()
-      if not ok then
-        local message = "Failed to do SSL handshake with " .. host .. ":" .. tostring(port) .. ": ", err
-        ngx.log(ngx.ERR, message)
-        return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
-      end
-    end
+  local post_request = string.format(
+    "POST %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s",
+    parsed_url.path, parsed_url.host, #payload, payload)
+  ngx.log(ngx.ERR, "Post request to PDP:\n", post_request .. "\n")
+  local ok, err = sock:send(post_request)
+  if not ok then
+    local message = "Failed to send request to PDP", err
+    ngx.log(ngx.ERR, message)
+    return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
+  else
+    ngx.log(ngx.ERR, "No send error: ", ok)
+  end
 
-    local post_request = string.format(
-      "POST %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s",
-      parsed_url.path, parsed_url.host, #payload, payload)
-    ngx.log(ngx.ERR, "Post request to PDP:\n", post_request .. "\n")
-    local ok, err = sock:send(post_request)
-    if not ok then
-      local message = "Failed to send request to PDP", err
+  -- Parse the response --
+  local line, err = sock:receive("*l") -- each call returns a single line
+  if err then
+    local message = "Failed to read response from PDP: ", err
+    ngx.log(ngx.ERR, message)
+    return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
+  end
+
+  local status_code = tonumber(string.match(line, "%s(%d%d%d)%s"))
+  if status_code ~= 200 then
+      local message = "Received a non-200 code from PDP: ", status_code
       ngx.log(ngx.ERR, message)
-      return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
-    else
-      ngx.log(ngx.ERR, "No send error: ", ok)
-    end
+      return_error.exit(message, ngx.HTTP_BAD_GATEWAY)
+  else
+      ngx.log(ngx.ERR, "PDP response: ", line)
+  end
 
-    -- Parse the response --
-    local line, err = sock:receive("*l") -- each call returns a single line
+  local headers = {} -- response headers
+  repeat
+    line, err = sock:receive("*l")
     if err then
-      local message = "Failed to read response from PDP: ", err
-      ngx.log(ngx.ERR, message)
-      return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
-    end
-
-    local status_code = tonumber(string.match(line, "%s(%d%d%d)%s"))
-    if status_code ~= 200 then
-        local message = "Received a non-200 code from PDP: ", status_code
-        ngx.log(ngx.ERR, message)
-        return_error.exit(message, ngx.HTTP_BAD_GATEWAY)
-    else
-        ngx.log(ngx.ERR, "PDP response: ", line)
-    end
-
-    local headers = {} -- response headers
-    repeat
-      line, err = sock:receive("*l")
-      if err then
-        local message = "Failed to read header from PDP response: ", err
-        ngx.log(ngx.ERR, message)
-        return_error.exit(message, ngx.HTTP_INTERNAL_SERVER_ERROR)
-      end
-
-      local pair = ngx.re.match(line, "(.*):\\s*(.*)", "jo")
-      if pair then
-        headers[string.lower(pair[1])] = pair[2]
-      end
-    until ngx.re.find(line, "^\\s*$") -- first empty line
-
-    local body, err = sock:receive(tonumber(headers['content-length']))
-    if err then
-      local message = "Failed to read body from PDP response: ", err
+      local message = "Failed to read header from PDP response: ", err
       ngx.log(ngx.ERR, message)
       return_error.exit(message, ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
-    body = JSON:decode(body)
-    ngx.log(ngx.ERR, "Response body from PDP:\n", JSON:encode_pretty(body), "\n")
 
-    return body
+    local pair = ngx.re.match(line, "(.*):\\s*(.*)", "jo")
+    if pair then
+      headers[string.lower(pair[1])] = pair[2]
+    end
+  until ngx.re.find(line, "^\\s*$") -- first empty line
+
+  local body, err = sock:receive(tonumber(headers['content-length']))
+  if err then
+    local message = "Failed to read body from PDP response: ", err
+    ngx.log(ngx.ERR, message)
+    return_error.exit(message, ngx.HTTP_INTERNAL_SERVER_ERROR)
   end
+  body = JSON:decode(body)
+  ngx.log(ngx.ERR, "Response body from PDP:\n", JSON:encode_pretty(body), "\n")
+
+  return body
+end
 
 return _M
