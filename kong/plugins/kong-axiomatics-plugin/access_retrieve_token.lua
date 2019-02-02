@@ -3,9 +3,8 @@ local return_error = require "kong.plugins.kong-axiomatics-plugin.return_error"
 local _M = {}
 
 -- Retrieve JWT from the parametrised request header name --
-function _M.retrieve_token(conf)
+function _M.retrieve_token(header, conf)
   local jwt
-  local header = ngx.req.get_headers()[conf.token_header_name]
 
   if header == nil then
     local message = conf.token_header_name .. " header not present"

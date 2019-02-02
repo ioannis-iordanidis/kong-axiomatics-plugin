@@ -7,7 +7,7 @@ local make_decision = require "kong.plugins.kong-axiomatics-plugin.access_decisi
 local _M = {}
 
 function _M.execute(conf)
-  local base64_token = retrieve_token.retrieve_token(conf)
+  local base64_token = retrieve_token.retrieve_token(ngx.req.get_headers()[conf.token_header_name], conf)
   local token = decode_token.decode_token(base64_token)
   local payload = compose_post_payload.compose_post_payload(token, conf)
   local pdp_xacml_response = sent_post_request.sent_post_request(payload, conf)
