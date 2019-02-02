@@ -28,7 +28,7 @@ function _M.retrieve_token(conf)
     return_error.exit(message, ngx.HTTP_BAD_REQUEST)
   end
 
-  ngx.log(ngx.DEBUG, "JWT token located using header: " .. conf.token_header_name .. ", token length: " .. string.len(jwt))
+  ngx.log(ngx.DEBUG, "JWT token located using header: ", conf.token_header_name, ", token length: ", string.len(jwt))
   return jwt
 end
 

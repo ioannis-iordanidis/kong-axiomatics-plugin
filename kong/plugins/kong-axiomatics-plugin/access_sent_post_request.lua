@@ -33,7 +33,7 @@ function _M.sent_post_request(payload, conf)
 
   local ok, err = sock:connect(host, port)
   if not ok then
-    local message = "Failed to connect to " .. host .. ":" .. tostring(port) .. ": ", err
+    local message = "Failed to connect to " .. host .. ":" .. tostring(port) .. ": " .. err
     ngx.log(ngx.ERR, message)
     return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
   end
@@ -41,7 +41,7 @@ function _M.sent_post_request(payload, conf)
   if parsed_url.scheme == HTTPS then
     local ok, err = sock:sslhandshake()
     if not ok then
-      local message = "Failed to do SSL handshake with " .. host .. ":" .. tostring(port) .. ": ", err
+      local message = "Failed to do SSL handshake with " .. host .. ":" .. tostring(port) .. ": " .. err
       ngx.log(ngx.ERR, message)
       return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
     end
@@ -50,10 +50,10 @@ function _M.sent_post_request(payload, conf)
   local post_request = string.format(
     "POST %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s",
     parsed_url.path, parsed_url.host, #payload, payload)
-  ngx.log(ngx.ERR, "Post request to PDP:\n", post_request .. "\n")
+  ngx.log(ngx.ERR, "Post request to PDP:\n", post_request, "\n")
   local ok, err = sock:send(post_request)
   if not ok then
-    local message = "Failed to send request to PDP", err
+    local message = "Failed to send request to PDP" .. err
     ngx.log(ngx.ERR, message)
     return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
   else
@@ -63,7 +63,7 @@ function _M.sent_post_request(payload, conf)
   -- Parse the response --
   local line, err = sock:receive("*l") -- each call returns a single line
   if err then
-    local message = "Failed to read response from PDP: ", err
+    local message = "Failed to read response from PDP: " .. err
     ngx.log(ngx.ERR, message)
     return_error.exit(message, ngx.HTTP_SERVICE_UNAVAILABLE)
   end
@@ -81,7 +81,7 @@ function _M.sent_post_request(payload, conf)
   repeat
     line, err = sock:receive("*l")
     if err then
-      local message = "Failed to read header from PDP response: ", err
+      local message = "Failed to read header from PDP response: " .. err
       ngx.log(ngx.ERR, message)
       return_error.exit(message, ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
@@ -94,7 +94,7 @@ function _M.sent_post_request(payload, conf)
 
   local body, err = sock:receive(tonumber(headers['content-length']))
   if err then
-    local message = "Failed to read body from PDP response: ", err
+    local message = "Failed to read body from PDP response: " .. err
     ngx.log(ngx.ERR, message)
     return_error.exit(message, ngx.HTTP_INTERNAL_SERVER_ERROR)
   end
