@@ -47,9 +47,22 @@ function _M.sent_post_request(payload, conf)
     end
   end
 
+  local authorization_header = ""
+  if conf.basic_http_auth then
+    local base64_credentials = ngx.encode_base64(conf.pdp_username .. ":" .. conf.pdp_password)
+    authorization_header = "Authorization: Basic " .. base64_credentials .. "\r\n"
+  end
+
   local post_request = string.format(
-    "POST %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s",
-    parsed_url.path, parsed_url.host, #payload, payload)
+    "POST %s HTTP/1.1\r\n\z
+    Host: %s\r\n\z
+    %s\z
+    Connection: Keep-Alive\r\n\z
+    Content-Type: application/json\r\n\z
+    Content-Length: %s\r\n\z
+    \r\n\z
+    %s",
+    parsed_url.path, parsed_url.host, authorization_header, #payload, payload)
   ngx.log(ngx.ERR, "Post request to PDP:\n", post_request, "\n")
   local ok, err = sock:send(post_request)
   if not ok then
