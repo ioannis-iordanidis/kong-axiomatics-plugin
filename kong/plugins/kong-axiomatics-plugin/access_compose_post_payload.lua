@@ -11,7 +11,7 @@ function _M.compose_post_payload(decoded_token, conf)
   local claims = decoded_token.claims
   for claim_key,claim_value in pairs(claims) do
     for i,claim_pattern in pairs(conf.claims_to_include) do
-      if string.match(claim_key, "^"..claim_pattern.."$") then
+      if claim_key == claim_pattern then
         local key_value = {}
         key_value["AttributeId"] = claim_key
         key_value["Value"] = claim_value
