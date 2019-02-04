@@ -63,6 +63,7 @@ function _M.sent_post_request(payload, conf)
     \r\n\z
     %s",
     parsed_url.path, parsed_url.host, authorization_header, #payload, payload)
+
   ngx.log(ngx.ERR, "Post request to PDP:\n", post_request, "\n")
   local ok, err = sock:send(post_request)
   if not ok then
