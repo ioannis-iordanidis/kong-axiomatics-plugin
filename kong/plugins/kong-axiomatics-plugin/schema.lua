@@ -1,5 +1,5 @@
 return {
-  no_consumer = true,
+  no_consumer = true, -- this plugin will only be applied to Services or Routes
   fields = {
     pdp_url = {type = "string", required = true},
     basic_http_auth = {type = "boolean", required = false, default = false},
