@@ -84,7 +84,7 @@ function _M.sent_post_request(payload, conf)
 
   local status_code = tonumber(string.match(line, "%s(%d%d%d)%s"))
   if status_code ~= 200 then
-      local message = "Received a non-200 code from PDP: " .. line
+      local message = "Error response from PDP: " .. line
       ngx.log(ngx.ERR, message)
       return_error.exit(message, ngx.HTTP_BAD_GATEWAY)
   else
