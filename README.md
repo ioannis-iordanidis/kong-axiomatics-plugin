@@ -51,22 +51,26 @@ docker-compose down -v
 <table><thead>
 <tr>
 <th>form parameter</th>
+<th>required</th>
 <th>default</th>
 <th>description</th>
 </tr>
 </thead><tbody>
 <tr>
-<td><code>config.pdp_url</code><br><em>required</em></td>
+<td><code>config.pdp_url</code></td>
+<td>yes</td>
 <td></td>
 <td>The URL to which the plugin will make a JSON <code>POST</code> request before proxying the original request.</td>
 </tr>
 <tr>
-<td><code>config.token_header_name</code><br><em>required</em></td>
+<td><code>config.token_header_name</code></td>
+<td>yes</td>
 <td>Authorization</td>
 <td>The name of the header that carries the JWT</td>
 </tr>
 <tr>
 <td><code>config.claims_to_include</code></td>
+<td>no</td>
 <td></td>
 <td>A list of strings that correspond to the claims we are interested in forwarding to the PDP from the JWT</td>
 </tr>
