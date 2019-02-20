@@ -50,10 +50,10 @@ docker-compose down -v
 
 <table><thead>
 <tr>
-<th>form parameter</th>
-<th>required</th>
-<th>default</th>
-<th>description</th>
+<th>Form Parameter</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
 </tr>
 </thead><tbody>
 <tr>
