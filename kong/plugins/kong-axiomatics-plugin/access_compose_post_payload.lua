@@ -5,7 +5,7 @@ local _M = {}
 
 -- Compose XACML POST body --
 function _M.compose_post_payload(decoded_token, conf)
-  -- AccessSubject XACML values
+  -- AccessSubject XACML values from JWT
   local access_subject_attribute_list = {}
   local access_subject = {}
   local claims = decoded_token.claims
@@ -19,6 +19,14 @@ function _M.compose_post_payload(decoded_token, conf)
       end
     end
   end
+  -- AccessSubject XACML values from URI path
+  if conf.url_parameter_matching then
+    local key_value = {}
+    key_value["AttributeId"] = conf.url_parameter_key
+    key_value["Value"] = string.match(ngx.var.request_uri, "([^/]+)$")
+    table.insert(access_subject_attribute_list, key_value)
+  end
+
   access_subject["Attribute"] = access_subject_attribute_list
 
   -- Action XACML values

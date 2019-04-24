@@ -6,6 +6,8 @@ return {
     pdp_username = {type = "string", required = false},
     pdp_password = {type = "string", required = false},
     token_header_name = {type = "string", required = true, default = "Authorization"},
-    claims_to_include = {type = "array", default = {".*"}}
+    claims_to_include = {type = "array", default = {".*"}},
+    url_parameter_matching = {type = "boolean", required = false, default = false},
+    url_parameter_key = {type = "string", required = false}
   }
 }
