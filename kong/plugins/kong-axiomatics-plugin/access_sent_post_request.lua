@@ -58,7 +58,7 @@ function _M.sent_post_request(payload, conf)
     Host: %s\r\n\z
     %s\z
     Connection: Keep-Alive\r\n\z
-    Content-Type: application/json\r\n\z
+    Content-Type: application/xacml+json\r\n\z
     Content-Length: %s\r\n\z
     \r\n\z
     %s",
